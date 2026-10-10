@@ -1,19 +1,16 @@
 
 import pandas as pd
 import plotly.express as px
-import subprocess
-import sys
-from dash import Dash, dcc, html, Input, Output, dash_table, ctx
-
-
-
-df = pd.read_csv("premier_league.csv")
-scorers_df = pd.read_csv("top_scorers.csv")
+from dash import Dash, dcc, html, Input, Output, dash_table
 
 
 app = Dash(__name__)
 
+df = pd.read_csv("premier_league.csv")
+scorers_df = pd.read_csv("top_scorers.csv")
+
 teams = sorted(df["Team"].dropna().unique())
+
 
 app.layout = html.Div(
     style={"fontFamily": "Arial", "padding": "25px"},
@@ -22,6 +19,7 @@ app.layout = html.Div(
             "Premier League Analytics Dashboard",
             style={"textAlign": "center"}
         ),
+
         dcc.Interval(
             id="refresh-interval",
             interval=3600 * 1000,
@@ -55,9 +53,7 @@ app.layout = html.Div(
 
         dash_table.DataTable(
             id="scorers-table",
-            data=scorers_df[
-                ["rank", "Name", "Goals", "Assists", "Played"]
-            ].drop_duplicates(subset=["Name"]).to_dict("records"),
+            data=[],
             columns=[
                 {"name": "Rank", "id": "rank"},
                 {"name": "Player", "id": "Name"},
@@ -78,7 +74,6 @@ app.layout = html.Div(
 )
 
 
-
 @app.callback(
     Output("kpi-cards", "children"),
     Output("points-chart", "figure"),
@@ -88,30 +83,8 @@ app.layout = html.Div(
     Input("refresh-interval", "n_intervals")
 )
 def update_dashboard(selected_team, n_intervals):
-    global df, scorers_df
-
-    if ctx.triggered_id == "refresh-interval":
-        try:
-            subprocess.run(
-                [sys.executable, "scraper.py"],
-                check=True,
-                timeout=120
-            )
-
-            subprocess.run(
-                [sys.executable, "top_scorers_scraper.py"],
-                check=True,
-                timeout=120
-            )
-
-            print("Data refreshed successfully!")
-
-        except Exception as error:
-            print("Data refresh failed:", error)
-
     df = pd.read_csv("premier_league.csv")
     scorers_df = pd.read_csv("top_scorers.csv")
-
 
     if selected_team == "All":
         filtered_df = df.copy()
@@ -121,6 +94,7 @@ def update_dashboard(selected_team, n_intervals):
     total_teams = len(filtered_df)
     total_points = filtered_df["Points"].sum()
     total_goals = filtered_df["Goals For"].sum()
+
     avg_goals = (
         filtered_df["Goals For"].mean()
         if total_teams else 0

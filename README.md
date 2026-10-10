@@ -1,25 +1,21 @@
-## Project Overview
+# Premier League Analytics Dashboard
 
-This project is an interactive dashboard for analyzing Premier League statistics. It displays league standings, team points, goals scored, and top scorers using data collected from BBC Sport.
+## Project Overview
+This project is an interactive dashboard for analyzing Premier League statistics. It displays league standings, team points, goals scored, and top scorers.
 
 ## Data Sources
-
-- [BBC Sport Premier League Table](https://www.bbc.co.uk/sport/football/premier-league/table)
-- [BBC Sport Premier League Top Scorers](https://www.bbc.co.uk/sport/football/premier-league/top-scorers)
+- BBC Sport Premier League Table
+- BBC Sport Premier League Top Scorers
 
 ## Features
-
 - Web scraping using Python and BeautifulSoup.
 - Saving scraped data into CSV files.
 - Four KPI cards showing teams, total points, total goals, and average goals.
 - Interactive charts for team points and goals scored.
 - Team filter to explore individual teams.
 - Top scorers table showing goals, assists, and matches played.
-- Automatic data refresh every hour.
-- Data quality checks for missing values and duplicate rows.
 
 ## Technologies Used
-
 - Python
 - Requests
 - BeautifulSoup
@@ -28,11 +24,9 @@ This project is an interactive dashboard for analyzing Premier League statistics
 - Dash
 
 ## Project Files
-
 - `scraper.py`: Scrapes Premier League standings.
 - `top_scorers_scraper.py`: Scrapes top scorers.
-- `app.py`: Runs the interactive dashboard and handles automatic refresh.
-- `check_data.py`: Checks dataset quality.
+- `app.py`: Runs the interactive dashboard.
 - `premier_league.csv`: League standings dataset.
 - `top_scorers.csv`: Top scorers dataset.
 
@@ -57,5 +51,4 @@ This project is an interactive dashboard for analyzing Premier League statistics
 5. Open `http://127.0.0.1:8050/` in your browser.
 
 ## Author
-
 AI Engineering Student
