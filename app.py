@@ -1,10 +1,15 @@
 
 import pandas as pd
 import plotly.express as px
-from dash import Dash, dcc, html, Input, Output, dash_table
+import subprocess
+import sys
+from dash import Dash, dcc, html, Input, Output, dash_table, ctx
+
+
 
 df = pd.read_csv("premier_league.csv")
 scorers_df = pd.read_csv("top_scorers.csv")
+
 
 app = Dash(__name__)
 
@@ -16,6 +21,11 @@ app.layout = html.Div(
         html.H1(
             "Premier League Analytics Dashboard",
             style={"textAlign": "center"}
+        ),
+        dcc.Interval(
+            id="refresh-interval",
+            interval=3600 * 1000,
+            n_intervals=0
         ),
 
         html.Label("Select a Team"),
@@ -44,6 +54,7 @@ app.layout = html.Div(
         html.H2("Top Scorers"),
 
         dash_table.DataTable(
+            id="scorers-table",
             data=scorers_df[
                 ["rank", "Name", "Goals", "Assists", "Played"]
             ].drop_duplicates(subset=["Name"]).to_dict("records"),
@@ -67,13 +78,40 @@ app.layout = html.Div(
 )
 
 
+
 @app.callback(
     Output("kpi-cards", "children"),
     Output("points-chart", "figure"),
     Output("goals-chart", "figure"),
-    Input("team-filter", "value")
+    Output("scorers-table", "data"),
+    Input("team-filter", "value"),
+    Input("refresh-interval", "n_intervals")
 )
-def update_dashboard(selected_team):
+def update_dashboard(selected_team, n_intervals):
+    global df, scorers_df
+
+    if ctx.triggered_id == "refresh-interval":
+        try:
+            subprocess.run(
+                [sys.executable, "scraper.py"],
+                check=True,
+                timeout=120
+            )
+
+            subprocess.run(
+                [sys.executable, "top_scorers_scraper.py"],
+                check=True,
+                timeout=120
+            )
+
+            print("Data refreshed successfully!")
+
+        except Exception as error:
+            print("Data refresh failed:", error)
+
+    df = pd.read_csv("premier_league.csv")
+    scorers_df = pd.read_csv("top_scorers.csv")
+
 
     if selected_team == "All":
         filtered_df = df.copy()
@@ -125,7 +163,11 @@ def update_dashboard(selected_team):
         title="Goals Scored by Team"
     )
 
-    return card_elements, points_fig, goals_fig
+    scorer_data = scorers_df[
+        ["rank", "Name", "Goals", "Assists", "Played"]
+    ].drop_duplicates(subset=["Name"]).to_dict("records")
+
+    return card_elements, points_fig, goals_fig, scorer_data
 
 
 if __name__ == "__main__":

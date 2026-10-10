@@ -37,6 +37,33 @@ for tr in table.find_all("tr"):
 
 df = pd.DataFrame(rows, columns=headers)
 
+# Remove duplicated text within player names
+def clean_name(name):
+    words = str(name).split()
+    if len(words) % 2 == 0:
+        middle = len(words) // 2
+        if words[:middle] == words[middle:]:
+            return " ".join(words[:middle])
+    return name
+
+df["Name"] = df["Name"].apply(clean_name)
+
+# Keep only the columns needed for the dashboard
+df = df[
+    [
+        "rank",
+        "Name",
+        "Goals",
+        "Assists",
+        "Played",
+        "Total Shots",
+        "Goal Conversion",
+        "Shot Accuracy"
+    ]
+]
+
+df = df.drop_duplicates()
+
 if df.empty:
     raise ValueError("No scorer data extracted. Check the page structure.")
 
